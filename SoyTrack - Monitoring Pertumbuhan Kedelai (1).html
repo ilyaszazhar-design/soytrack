@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SoyTrack</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EDF2E7;--card:#FFFFFF;--ink:#1B2A1E;--mute:#5E6F61;--line:#D3DDCB;--g:#2E6B3A;--g2:#E1EED9;--gold:#B8860B;--red:#B3402F;--on:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141C16;--card:#1D281F;--ink:#E6EFE4;--mute:#9BAE9E;--line:#2D3C30;--g:#6FBF7E;--g2:#25362A;--gold:#E0B84A;--red:#E8806E;--on:#10200F}}
+:root[data-theme="dark"]{--bg:#141C16;--card:#1D281F;--ink:#E6EFE4;--mute:#9BAE9E;--line:#2D3C30;--g:#6FBF7E;--g2:#25362A;--gold:#E0B84A;--red:#E8806E;--on:#10200F}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Figtree,system-ui,sans-serif}
+main{max-width:720px;margin:0 auto;padding:16px 16px 90px}
+h1{font-size:26px;font-weight:800;margin:0;letter-spacing:-.5px}
+h2{font-size:18px;margin:0 0 10px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.sub{color:var(--mute);font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.hero{display:flex;gap:14px;align-items:center;background:var(--g);color:var(--on);border:0}
+.hero .big{font-size:44px;font-weight:800;line-height:1}
+.hero .sub{color:inherit;opacity:.85}
+label{display:block;font-size:13px;font-weight:600;color:var(--mute);margin:10px 0 4px}
+input,textarea,select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px}
+input:focus,textarea:focus,select:focus,button:focus-visible{outline:2px solid var(--g);outline-offset:1px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{font:inherit;font-weight:600;border:0;border-radius:10px;padding:11px 16px;background:var(--g);color:var(--on);cursor:pointer}
+button.ghost{background:transparent;color:var(--g);border:1px solid var(--line)}
+button.x{background:transparent;color:var(--red);padding:4px 8px}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{flex:1;max-width:180px;background:transparent;color:var(--mute);border-radius:0;padding:12px 4px;font-size:14px}
+nav button[aria-selected="true"]{color:var(--g);box-shadow:inset 0 3px 0 var(--g)}
+.hidden{display:none}
+.entry{display:flex;gap:12px;padding:10px 0;border-top:1px solid var(--line);align-items:flex-start}
+.entry:first-child{border-top:0}
+.entry img{width:56px;height:56px;object-fit:cover;border-radius:8px}
+.entry .m{flex:1;min-width:0}
+.tag{display:inline-block;background:var(--g2);color:var(--g);border-radius:99px;padding:1px 10px;font-size:13px;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.grid figure{margin:0}
+.grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block}
+.grid figcaption{font-size:13px;color:var(--mute);margin-top:4px}
+.task{display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.task input{width:22px;height:22px;flex:none;accent-color:var(--g)}
+.task.done span{text-decoration:line-through;color:var(--mute)}
+.task .m{flex:1}
+.late{color:var(--red);font-weight:600}
+.empty{color:var(--mute);text-align:center;padding:18px 6px}
+svg{width:100%;height:auto;display:block}
+.legend{font-size:13px;color:var(--mute);margin-top:4px}
+</style>
+</head>
+<body>
+<main>
+<div class="top">
+  <div><h1>🌱 SoyTrack</h1><div class="sub" id="plotName"></div></div>
+  <button class="ghost" id="setupBtn">Atur lahan</button>
+</div>
+
+<section id="setup" class="card hidden">
+  <h2>Data tanam</h2>
+  <label for="sName">Nama lahan atau varietas</label>
+  <input id="sName" placeholder="Contoh: Kebun belakang, Anjasmoro">
+  <label for="sDate">Tanggal tanam</label>
+  <input id="sDate" type="date">
+  <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+    <button id="sSave">Simpan</button>
+    <button class="ghost" id="sReset">Hapus semua data</button>
+  </div>
+  <div class="sub" id="sNote" style="margin-top:8px"></div>
+</section>
+
+<div id="hero" class="card hero"></div>
+
+<section id="tab-catat">
+  <form id="f" class="card" onsubmit="return false">
+    <h2>Catat pertumbuhan</h2>
+    <div class="row">
+      <div><label for="eDate">Tanggal</label><input id="eDate" type="date"></div>
+      <div><label for="eH">Tinggi (cm)</label><input id="eH" type="number" min="0" step="0.1" inputmode="decimal"></div>
+    </div>
+    <div class="row">
+      <div><label for="eL">Jumlah daun</label><input id="eL" type="number" min="0" step="1" inputmode="numeric"></div>
+      <div><label for="eP">Foto (opsional)</label><input id="eP" type="file" accept="image/*"></div>
+    </div>
+    <label for="eN">Catatan</label>
+    <textarea id="eN" rows="2" placeholder="Kondisi daun, hama, cuaca…"></textarea>
+    <div style="margin-top:14px"><button id="eSave">Simpan catatan</button> <span class="sub" id="eMsg"></span></div>
+  </form>
+  <div class="card"><h2>Riwayat</h2><div id="list"></div></div>
+</section>
+
+<section id="tab-grafik" class="hidden">
+  <div class="card"><h2>Tinggi tanaman per minggu</h2><div id="c1"></div><div class="legend">Rata-rata tinggi (cm) tiap minggu setelah tanam</div></div>
+  <div class="card"><h2>Jumlah daun per minggu</h2><div id="c2"></div><div class="legend">Rata-rata jumlah daun tiap minggu setelah tanam</div></div>
+</section>
+
+<section id="tab-foto" class="hidden">
+  <div class="card"><h2>Dokumentasi foto</h2><div id="gallery"></div></div>
+</section>
+
+<section id="tab-ingat" class="hidden">
+  <form class="card" onsubmit="return false">
+    <h2>Tambah pengingat</h2>
+    <div class="row">
+      <div><label for="tTitle">Kegiatan</label><input id="tTitle" placeholder="Contoh: Semprot pestisida nabati"></div>
+      <div><label for="tDate">Tanggal</label><input id="tDate" type="date"></div>
+    </div>
+    <div style="margin-top:14px"><button id="tAdd">Tambah pengingat</button></div>
+  </form>
+  <div class="card"><h2>Jadwal perawatan</h2><div id="tasks"></div></div>
+</section>
+</main>
+
+<nav role="tablist">
+  <button role="tab" data-t="catat" aria-selected="true">Catat</button>
+  <button role="tab" data-t="grafik" aria-selected="false">Grafik</button>
+  <button role="tab" data-t="foto" aria-selected="false">Foto</button>
+  <button role="tab" data-t="ingat" aria-selected="false">Pengingat</button>
+</nav>
+
+<script>
+const KEY='soytrack-v1';
+let S={name:'',planted:'',entries:[],tasks:[]};
+try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r));}catch(e){}
+let mem=false;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));mem=false;}catch(e){mem=true;msg('Penyimpanan penuh, data hanya tersimpan sementara.');}}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const iso=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)};
+const today=()=>iso(new Date());
+const dd=(a,b)=>Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/864e5);
+const addDays=(d,n)=>{const x=new Date(d+'T00:00:00');x.setDate(x.getDate()+n);return iso(x)};
+const fmt=d=>new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function msg(t){const m=$('eMsg');m.textContent=t;setTimeout(()=>{if(m.textContent===t)m.textContent=''},3500)}
+
+const PLAN=[[7,'Periksa pertumbuhan dan sulam bibit yang mati'],[14,'Penyiangan gulma pertama'],[14,'Pemupukan susulan'],[21,'Pembumbunan dan penjarangan'],[28,'Periksa hama (ulat daun, kutu)'],[35,'Penyiangan kedua'],[45,'Pantau pembungaan dan hama'],[60,'Periksa pembentukan polong'],[75,'Kurangi penyiraman dan cek kematangan'],[85,'Panen jika polong kuning dan daun gugur']];
+function stage(h){if(h<0)return'Belum tanam';if(h<10)return'Perkecambahan';if(h<35)return'Fase vegetatif';if(h<60)return'Berbunga';if(h<85)return'Pembentukan polong';return'Menjelang panen'}
+function makePlan(){S.tasks=S.tasks.filter(t=>t.custom);PLAN.forEach(([n,t])=>S.tasks.push({id:uid(),title:t,date:addDays(S.planted,n),done:false,custom:false}))}
+
+function render(){
+  $('plotName').textContent=S.name||'Pantau kedelai dari tanam sampai panen';
+  const has=!!S.planted;
+  $('setup').classList.toggle('hidden',has&&!showSetup);
+  $('tab-catat').classList.toggle('hidden',!(has&&tab==='catat'));
+  ['grafik','foto','ingat'].forEach(t=>$('tab-'+t).classList.toggle('hidden',!(has&&tab===t)));
+  document.querySelector('nav').classList.toggle('hidden',!has);
+  $('hero').classList.toggle('hidden',!has);
+  if(!has){$('sNote').textContent='Isi tanggal tanam untuk memulai. Jadwal perawatan dibuat otomatis.';return}
+  const h=dd(S.planted,today());
+  const last=S.entries.slice().sort((a,b)=>a.date.localeCompare(b.date)).pop();
+  $('hero').innerHTML='<div><div class="big">'+Math.max(h,0)+'</div><div class="sub">hari setelah tanam</div></div><div style="flex:1"><div style="font-weight:800;font-size:18px">'+stage(h)+'</div><div class="sub">'+(last?'Terakhir: '+last.h+' cm, '+last.l+' daun ('+fmt(last.date)+')':'Belum ada catatan. Mulai catat hari ini.')+'</div></div>';
+  renderList();renderCharts();renderGallery();renderTasks();
+}
+function renderList(){
+  const es=S.entries.slice().sort((a,b)=>b.date.localeCompare(a.date));
+  $('list').innerHTML=es.length?es.map(e=>'<div class="entry">'+(e.photo?'<img src="'+e.photo+'" alt="Foto tanaman '+fmt(e.date)+'">':'')+'<div class="m"><div><strong>'+fmt(e.date)+'</strong> <span class="tag">HST '+dd(S.planted,e.date)+'</span></div><div>'+e.h+' cm · '+e.l+' daun</div>'+(e.note?'<div class="sub">'+esc(e.note)+'</div>':'')+'</div><button class="x" data-del="'+e.id+'" aria-label="Hapus catatan">Hapus</button></div>').join(''):'<div class="empty">Belum ada catatan. Isi formulir di atas untuk mencatat tinggi dan jumlah daun.</div>';
+}
+function weekly(key){
+  const m={};
+  S.entries.forEach(e=>{const w=Math.floor(Math.max(dd(S.planted,e.date),0)/7)+1;(m[w]=m[w]||[]).push(+e[key])});
+  return Object.keys(m).map(Number).sort((a,b)=>a-b).map(w=>({w,v:m[w].reduce((a,b)=>a+b,0)/m[w].length}));
+}
+function chart(pts,color,unit){
+  if(!pts.length)return'<div class="empty">Grafik muncul setelah ada catatan.</div>';
+  const W=600,H=230,L=44,R=16,T=16,B=36;
+  const maxW=Math.max(pts[pts.length-1].w,4),maxV=Math.max(...pts.map(p=>p.v))*1.15||1;
+  const x=w=>L+(w-1)/(maxW-1)*(W-L-R),y=v=>T+(1-v/maxV)*(H-T-B);
+  let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Grafik mingguan">';
+  for(let i=0;i<=4;i++){const v=maxV*i/4,yy=y(v);s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yy+'" y2="'+yy+'" stroke="var(--line)"/><text x="'+(L-6)+'" y="'+(yy+4)+'" text-anchor="end" font-size="12" fill="var(--mute)">'+(v<10?v.toFixed(1):Math.round(v))+'</text>'}
+  for(let w=1;w<=maxW;w++)s+='<text x="'+x(w)+'" y="'+(H-12)+'" text-anchor="middle" font-size="12" fill="var(--mute)">M'+w+'</text>';
+  s+='<polyline fill="none" stroke="'+color+'" stroke-width="3" stroke-linejoin="round" points="'+pts.map(p=>x(p.w)+','+y(p.v)).join(' ')+'"/>';
+  pts.forEach(p=>{s+='<circle cx="'+x(p.w)+'" cy="'+y(p.v)+'" r="5" fill="'+color+'"><title>Minggu '+p.w+': '+p.v.toFixed(1)+' '+unit+'</title></circle>'});
+  return s+'</svg>';
+}
+function renderCharts(){$('c1').innerHTML=chart(weekly('h'),'var(--g)','cm');$('c2').innerHTML=chart(weekly('l'),'var(--gold)','daun')}
+function renderGallery(){
+  const ps=S.entries.filter(e=>e.photo).sort((a,b)=>a.date.localeCompare(b.date));
+  $('gallery').innerHTML=ps.length?'<div class="grid">'+ps.map(e=>'<figure><img src="'+e.photo+'" alt="Foto tanaman '+fmt(e.date)+'"><figcaption>'+fmt(e.date)+' · HST '+dd(S.planted,e.date)+'</figcaption></figure>').join('')+'</div>':'<div class="empty">Belum ada foto. Tambahkan foto saat mencatat pertumbuhan untuk melihat perubahannya dari waktu ke waktu.</div>';
+}
+function renderTasks(){
+  const t=today(),ts=S.tasks.slice().sort((a,b)=>a.date.localeCompare(b.date));
+  $('tasks').innerHTML=ts.length?ts.map(k=>{const diff=dd(t,k.date);const st=k.done?'Selesai':diff<0?'<span class="late">Terlambat '+(-diff)+' hari</span>':diff===0?'<strong>Hari ini</strong>':'H-'+diff;
+    return'<div class="task'+(k.done?' done':'')+'"><input type="checkbox" data-done="'+k.id+'" '+(k.done?'checked':'')+' aria-label="Tandai selesai"><div class="m"><span>'+esc(k.title)+'</span><div class="sub">'+fmt(k.date)+' · '+st+'</div></div>'+(k.custom?'<button class="x" data-tdel="'+k.id+'" aria-label="Hapus pengingat">Hapus</button>':'')+'</div>'}).join(''):'<div class="empty">Belum ada pengingat.</div>';
+}
+
+let tab='catat',showSetup=false;
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));showSetup=false;render()});
+$('setupBtn').onclick=()=>{showSetup=!showSetup;$('sName').value=S.name;$('sDate').value=S.planted;$('sNote').textContent=S.planted?'Mengubah tanggal tanam akan membuat ulang jadwal perawatan otomatis.':'';render()};
+$('sSave').onclick=()=>{
+  const d=$('sDate').value;if(!d){$('sNote').textContent='Isi tanggal tanam dulu.';return}
+  const changed=d!==S.planted;S.name=$('sName').value.trim();S.planted=d;if(changed)makePlan();
+  save();showSetup=false;render()};
+$('sReset').onclick=()=>{if(confirm('Hapus semua catatan, foto, dan pengingat?')){S={name:'',planted:'',entries:[],tasks:[]};save();showSetup=true;$('sName').value='';$('sDate').value='';render()}};
+
+function shrink(file){return new Promise(res=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const m=640,k=Math.min(1,m/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.6))};im.onerror=()=>res('');im.src=r.result};r.onerror=()=>res('');r.readAsDataURL(file)})}
+$('eSave').onclick=async()=>{
+  const date=$('eDate').value,h=$('eH').value,l=$('eL').value;
+  if(!date||h===''||l===''){msg('Isi tanggal, tinggi, dan jumlah daun.');return}
+  if(dd(S.planted,date)<0){msg('Tanggal tidak boleh sebelum tanggal tanam.');return}
+  let photo='';const f=$('eP').files[0];if(f)photo=await shrink(f);
+  S.entries.push({id:uid(),date,h:+h,l:+l,note:$('eN').value.trim(),photo});
+  save();$('eH').value='';$('eL').value='';$('eN').value='';$('eP').value='';msg('Catatan disimpan.');render()};
+$('list').onclick=e=>{const id=e.target.dataset.del;if(id&&confirm('Hapus catatan ini?')){S.entries=S.entries.filter(x=>x.id!==id);save();render()}};
+$('tAdd').onclick=()=>{const t=$('tTitle').value.trim(),d=$('tDate').value;if(!t||!d)return;S.tasks.push({id:uid(),title:t,date:d,done:false,custom:true});$('tTitle').value='';save();render()};
+$('tasks').onclick=e=>{const d=e.target.dataset;
+  if(d.done){const k=S.tasks.find(x=>x.id===d.done);k.done=e.target.checked;save();render()}
+  if(d.tdel){S.tasks=S.tasks.filter(x=>x.id!==d.tdel);save();render()}};
+$('eDate').value=today();$('tDate').value=today();
+if(!S.planted){showSetup=true;$('sDate').value=today()}
+render();
+</script>
+</body>
+</html>
